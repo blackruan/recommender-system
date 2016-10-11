@@ -61,6 +61,10 @@ public class MultiplicationMapperJoin {
         public void reduce(IntWritable key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
 
+            // if the calculated score is smaller than the threshold, do not write this result out in order to optimize
+            // the file size of the intermediate jobs
+            double threshold = 0.1;
+
             Map<Integer, Double> movieRelationMap = new HashMap<Integer, Double>();
             Map<Integer, Double> ratingMap = new HashMap<Integer, Double>();
 
@@ -79,10 +83,12 @@ public class MultiplicationMapperJoin {
                 for(Map.Entry<Integer, Double> relationEntry: movieRelationMap.entrySet()) {
 
                     double score = relationEntry.getValue() * ratingEntry.getValue(); //5 * 8 = 40
-                    DecimalFormat df = new DecimalFormat("#.00");
-                    score = Double.valueOf(df.format(score));
-                    context.write(new Text(ratingEntry.getKey() + ":" + relationEntry.getKey()), new DoubleWritable(score));
-                    // user:movie tag score
+                    if(score >= threshold) {
+                        DecimalFormat df = new DecimalFormat("#.00");
+                        score = Double.valueOf(df.format(score));
+                        context.write(new Text(ratingEntry.getKey() + ":" + relationEntry.getKey()), new DoubleWritable(score));
+                    }
+                    // user:movie score
                 }
 
             }

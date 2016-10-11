@@ -42,14 +42,22 @@ public class MultiplicationSum {
         @Override
         public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
                 throws IOException, InterruptedException {
+
+            // if the calculated score is smaller than the threshold, do not write this result out in order to optimize
+            // the file size of the intermediate jobs
+            double threshold = 1;
+
             //user:movie score
             double sum = 0;
             while(values.iterator().hasNext()) {
                 sum += values.iterator().next().get();
             }
-            String[] tokens = key.toString().split(":");
-            int user = Integer.parseInt(tokens[0]);
-            context.write(new IntWritable(user), new Text(tokens[1] + ":" + sum));
+
+            if(sum >= threshold) {
+                String[] tokens = key.toString().split(":");
+                int user = Integer.parseInt(tokens[0]);
+                context.write(new IntWritable(user), new Text(tokens[1] + ":" + sum));
+            }
         }
     }
 
