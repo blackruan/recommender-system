@@ -24,46 +24,13 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 public class RecommenderListGenerator {
 	public static class RecommenderListGeneratorMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
 
-		//filter out watched movies
-		//match movie_name to movie_id
-		Map<Integer, List<Integer>> watchHistory = new HashMap<Integer, List<Integer>>();
-		
-		@Override
-		protected void setup(Context context) throws IOException {
-			//read movie watch history 
-			Configuration conf = context.getConfiguration();
-			String filePath = conf.get("watchHistory");
-			Path pt = new Path(filePath);
-			FileSystem fs = FileSystem.get(conf);
-			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(pt)));
-			String line = br.readLine();
-			
-			//user,movie,rating
-			while(line != null) {
-				int user = Integer.parseInt(line.split(",")[0]);
-				int movie = Integer.parseInt(line.split(",")[1]);
-				if(watchHistory.containsKey(user)) {
-					watchHistory.get(user).add(movie);
-				}
-				else {
-					List<Integer> list = new ArrayList<Integer>();
-					list.add(movie);
-					watchHistory.put(user, list);
-				}
-				line = br.readLine();
-			}
-			br.close();
-		}
-
 		@Override
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			//recommender user \t movie:rating
 			String[] tokens = value.toString().split("\t");
 			int user = Integer.parseInt(tokens[0]);
 			int movie = Integer.parseInt(tokens[1].split(":")[0]);
-			if(!watchHistory.containsKey(user) || !watchHistory.get(user).contains(movie)) {
-				context.write(new IntWritable(user), new Text(movie + ":" + tokens[1].split(":")[1]));
-			}
+			context.write(new IntWritable(user), new Text(movie + ":" + tokens[1].split(":")[1]));
 		}
 	}
 
@@ -108,8 +75,7 @@ public class RecommenderListGenerator {
 	public static void main(String[] args) throws Exception {
 
 		Configuration conf = new Configuration();
-		conf.set("watchHistory", args[0]);
-		conf.set("movieTitles", args[1]);
+		conf.set("movieTitles", args[0]);
 
 		Job job = Job.getInstance(conf);
 		job.setMapperClass(RecommenderListGeneratorMapper.class);
@@ -122,8 +88,8 @@ public class RecommenderListGenerator {
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 		
-		TextInputFormat.setInputPaths(job, new Path(args[2]));
-		TextOutputFormat.setOutputPath(job, new Path(args[3]));
+		TextInputFormat.setInputPaths(job, new Path(args[1]));
+		TextOutputFormat.setOutputPath(job, new Path(args[2]));
 
 		job.waitForCompletion(true);
 	}
