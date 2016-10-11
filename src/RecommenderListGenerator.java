@@ -26,7 +26,7 @@ public class RecommenderListGenerator {
 
 		//filter out watched movies
 		//match movie_name to movie_id
-		Map<Integer, List<Integer>> watchHistory = new HashMap<>();
+		Map<Integer, List<Integer>> watchHistory = new HashMap<Integer, List<Integer>>();
 		
 		@Override
 		protected void setup(Context context) throws IOException {
@@ -46,7 +46,7 @@ public class RecommenderListGenerator {
 					watchHistory.get(user).add(movie);
 				}
 				else {
-					List<Integer> list = new ArrayList<>();
+					List<Integer> list = new ArrayList<Integer>();
 					list.add(movie);
 					watchHistory.put(user, list);
 				}
@@ -69,7 +69,7 @@ public class RecommenderListGenerator {
 
 	public static class RecommenderListGeneratorReducer extends Reducer<IntWritable, Text, IntWritable, Text> {
 
-		Map<Integer, String> movieTitles = new HashMap<>();
+		Map<Integer, String> movieTitles = new HashMap<Integer, String>();
 		//match movie_name to movie_id
 		@Override
 		protected void setup(Context context) throws IOException {
