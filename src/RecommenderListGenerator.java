@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -61,13 +62,29 @@ public class RecommenderListGenerator {
 		@Override
 		public void reduce(IntWritable key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
+
+			// Top K: recommend top k movies with highest calculated ratings for each user
+			int K = 5;
+			PriorityQueue<Movie> heap = new PriorityQueue<Movie>();
+
 			//movie_id:rating
 			while(values.iterator().hasNext()) {
-				String cur = values.iterator().next().toString();
-				int movie_id = Integer.parseInt(cur.split(":")[0]);
-				String rating = cur.split(":")[1];
-				
-				context.write(key, new Text(movieTitles.get(movie_id) + ":" + rating));
+				String[] tokens = values.iterator().next().toString().trim().split(":");
+				int movie_id = Integer.parseInt(tokens[0]);
+				double rating = Double.parseDouble(tokens[1]);
+				if(heap.size() < K) {
+					heap.offer(new Movie(movie_id, rating));
+				} else {
+					if(heap.peek().getRating() < rating) {
+						heap.poll();
+						heap.offer(new Movie(movie_id, rating));
+					}
+				}
+			}
+
+			while(!heap.isEmpty()) {
+				Movie movie = heap.poll();
+				context.write(key, new Text(movieTitles.get(movie.getMovieId()) + ":" + movie.getRating()));
 			}
 		}
 	}
