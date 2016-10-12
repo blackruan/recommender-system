@@ -71,7 +71,6 @@ public class RecommenderListGenerator {
 	public static void main(String[] args) throws Exception {
 
 		Configuration conf = new Configuration();
-		conf.set("movieTitles", args[0]);
 
 		Job job = Job.getInstance(conf);
 		job.setMapperClass(RecommenderListGeneratorMapper.class);
@@ -84,8 +83,8 @@ public class RecommenderListGenerator {
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 
-		TextInputFormat.setInputPaths(job, new Path(args[1]));
-		TextOutputFormat.setOutputPath(job, new Path(args[2]));
+		TextInputFormat.setInputPaths(job, new Path(args[0]));
+		TextOutputFormat.setOutputPath(job, new Path(args[1]));
 
 		job.waitForCompletion(true);
 	}
