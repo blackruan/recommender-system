@@ -37,34 +37,13 @@ public class RecommenderListGenerator {
 
 	public static class RecommenderListGeneratorReducer extends Reducer<IntWritable, Text, IntWritable, Text> {
 
-		Map<Integer, String> movieTitles = new HashMap<Integer, String>();
-		//match movie_name to movie_id
-		@Override
-		protected void setup(Context context) throws IOException {
-			//<movie_id, movie_title>
-			//read movie title from file
-			Configuration conf = context.getConfiguration();
-			String filePath = conf.get("movieTitles");
-			Path pt = new Path(filePath);
-			FileSystem fs = FileSystem.get(conf);
-			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(pt)));
-			String line = br.readLine();
-			//movieid,movie_name
-			while(line != null) {
-				int movie_id = Integer.parseInt(line.trim().split(",")[0]);
-				movieTitles.put(movie_id, line.trim().split(",")[1]);
-				line = br.readLine();
-			}
-			br.close();
-		}
-
 		// reduce method
 		@Override
 		public void reduce(IntWritable key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
 
 			// Top K: recommend top k movies with highest calculated ratings for each user
-			int K = 5;
+			int K = 1;
 			PriorityQueue<Movie> heap = new PriorityQueue<Movie>();
 
 			//movie_id:rating
@@ -84,7 +63,7 @@ public class RecommenderListGenerator {
 
 			while(!heap.isEmpty()) {
 				Movie movie = heap.poll();
-				context.write(key, new Text(movieTitles.get(movie.getMovieId()) + ":" + movie.getRating()));
+				context.write(key, new Text(movie.getMovieId() + ":" + movie.getRating()));
 			}
 		}
 	}
@@ -104,7 +83,7 @@ public class RecommenderListGenerator {
 		job.setOutputFormatClass(TextOutputFormat.class);
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
-		
+
 		TextInputFormat.setInputPaths(job, new Path(args[1]));
 		TextOutputFormat.setOutputPath(job, new Path(args[2]));
 
