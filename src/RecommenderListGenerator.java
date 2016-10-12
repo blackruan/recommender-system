@@ -43,7 +43,7 @@ public class RecommenderListGenerator {
 				throws IOException, InterruptedException {
 
 			// Top K: recommend top k movies with highest calculated ratings for each user
-			int K = 1;
+			int K = 5;
 			PriorityQueue<Movie> heap = new PriorityQueue<Movie>();
 
 			//movie_id:rating
