@@ -42,12 +42,19 @@ public class CoOccurrenceMatrixGenerator {
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
 			//key movie1:movie2 value = iterable<1, 1, 1>
+
+			// if the calculated score is smaller than the threshold, do not write this result out in order to optimize
+			// the speed of the program
+
+			int threshold = 10;
 			int sum = 0;
 			while(values.iterator().hasNext()) {
 				sum += values.iterator().next().get();
 			}
-			
-			context.write(key, new IntWritable(sum));
+
+			if(sum > threshold) {
+				context.write(key, new IntWritable(sum));
+			}
 		}
 	}
 	
