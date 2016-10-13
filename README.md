@@ -1,17 +1,17 @@
-# Movie Recommender System
+# Movie Recommender System (Small dataset)
 
 ## Overview
-In this project, I built a movie recommender system based on Item Collaborative Filtering using Hadoop MapReduce in Java.
+The system in this branch is fit for small dataset and have a bit more features in RecommendationListGenerator, but would have problems if running for the original Netflix dataset.
 
 ## Data
-Data comes from Netflix Prize Challenge, which has the following format:
+Data has the following format:
 
 User_id, Movie_id, Rating  
-1,10001,5.0  
-2,10001,2.0  
-3,10001,2.0  
-4,10001,5.0  
-5,10001,4.0
+1, 10001, 5.0  
+2, 10001, 2.0  
+3, 10001, 2.0  
+4, 10001, 5.0  
+5, 10001, 4.0
 
 ## Step
 
